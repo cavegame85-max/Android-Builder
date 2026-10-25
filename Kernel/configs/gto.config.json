@@ -1,8 +1,48 @@
-{
-  "kernel_source": "https://github.com/charlessimmons334/SM-T295_Opensource",
-  "kernel_branch": "master",
-  "defconfig": "gto_defconfig",
-  "arch": "arm64",
-  "toolchain": "aosp-clang",
-  "clang_version": "r353983c"
-}
+[
+  {
+    "kernelSource": {
+      "name": "Samsung",
+      "repo": "https://github.com/charlessimmons334/SM-T295_Opensource",
+      "branch": "master",
+      "device": "gto",
+      "defconfig": "gto_defconfig"
+    },
+    "toolchains": [
+      {
+        "name": "Proton-Clang",
+        "repo": "https://github.com/kdrag0n/proton-clang",
+        "branch": "master",
+        "binaryEnv": [
+          "CC=clang",
+          "LLVM=1",
+          "LLVM_IAS=1",
+          "AR=llvm-ar",
+          "LD=ld.lld",
+          "OBJDUMP=llvm-objdump",
+          "STRIP=llvm-strip"
+        ]
+      }
+    ],
+    "enableCcache": true,
+    "params": {
+      "ARCH": "arm64",
+      "CC": "clang",
+      "externalCommands": {
+        "CROSS_COMPILE": "aarch64-linux-gnu-",
+        "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
+        "CROSS_COMPILE_COMPAT": "",
+        "CLANG_TRIPLE": ""
+      }
+    },
+    "AnyKernel3": {
+      "use": true,
+      "release": true,
+      "custom": {
+        "repo": "https://github.com/osm0sis/AnyKernel3.git",
+        "branch": "master"
+      }
+    },
+    "enableKernelSU": false,
+    "enableLXC": false
+  }
+]
