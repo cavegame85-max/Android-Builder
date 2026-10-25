@@ -1,0 +1,8 @@
+{
+  "kernel_source": "https://github.com/charlessimmons334/SM-T295_Opensource",
+  "kernel_branch": "master",
+  "defconfig": "gto_defconfig",
+  "arch": "arm64",
+  "toolchain": "aosp-clang",
+  "clang_version": "r353983c"
+}
