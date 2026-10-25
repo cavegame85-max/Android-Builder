@@ -5,7 +5,7 @@
       "repo": "https://github.com/charlessimmons334/SM-T295_Opensource",
       "branch": "master",
       "device": "gto",
-      "defconfig": "gto_defconfig"
+      "defconfig": "P81081-perf_defconfig"
     },
     "toolchains": [
       {
