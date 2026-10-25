@@ -190,6 +190,11 @@ jobs:
               echo "${{ env.WORKSPACE }}/$toolchain_name/$subPath" >> $GITHUB_PATH
             done
           done
+                - name: Disable Stack Protector
+        working-directory: ${{ env.KERNEL_NAME }}
+        run: |
+          sed -i '/CONFIG_CC_STACKPROTECTOR_STRONG/d' arch/arm64/configs/${{ env.KERNEL_DEFCONFIG_PATH }}
+          echo 'CONFIG_CC_STACKPROTECTOR_NONE=y' >> arch/arm64/configs/${{ env.KERNEL_DEFCONFIG_PATH }}
 
       - name: 😎 Set build args
         id: generate-args
