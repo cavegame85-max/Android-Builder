@@ -67,15 +67,12 @@ jobs:
       - name: ⭐ Install prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install gcc-aarch64-linux-gnu gcc-arm-linux-gnueabi -y
-          sudo apt-get install ca-certificates xz-utils mkbootimg cpio device-tree-compiler git git-lfs openssl -y
-          sudo apt-get install curl git ftp lftp wget libarchive-tools ccache python3-dev python3 -y
-          sudo apt-get install pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler -y
-          sudo apt-get install libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc -y
-          sudo apt-get install libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree -y
-          sudo apt-get install build-essential bc gcc libssl-dev libfl-dev -y
-          sudo apt-get install pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl -y
-          sudo apt-get install zip unzip tar gzip bzip2 rar unrar llvm g++-multilib bison gperf zlib1g-dev automake clang-14 lld -y
+          sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get install -y build-essential bc bison flex libssl-dev libelf-dev
+          sudo apt-get install -y git curl wget zip unzip tar gzip bzip2 xz-utils
+          sudo apt-get install -y ccache python3 python3-pip cpio
+          sudo apt-get install -y device-tree-compiler liblz4-tool
+          sudo apt-get install -y llvm clang lld
 
       - name: 🚄 Setup ccache
         if: ${{ env.ENABLE_CCACHE == 'true' }}
@@ -112,29 +109,19 @@ jobs:
           for ((i=0;i<toolchains_num;i++)); do
             toolchain=$(echo $toolchains | jq -r ".[$i]")
             toolchain_name=$(echo $toolchain | jq -r ".name")
-            if echo $toolchain | jq -e 'has("url")' > /dev/null; then
-              toolchain_url=$(echo $toolchain | jq -r ".url")
-              mkdir -p '$toolchain_name'
-              wget "$toolchain_url"
-              filename="${toolchain_url##*/}"
-              case "$filename" in
-                *.zip) unzip -d $toolchain_name "$filename" ;;
-                *.tar) tar xvf "$filename" -C $toolchain_name ;;
-                *.tar.gz) tar zxvf "$filename" -C $toolchain_name ;;
-                *.rar) unrar x "$filename" $toolchain_name ;;
-                *) echo "unknown file type: $filename" ;;
-              esac
-              rm $filename
-            else
-              toolchain_repo=$(echo $toolchain | jq -r ".repo")
-              toolchain_branch=$(echo $toolchain | jq -r ".branch")
-              git clone --recursive --depth=1 -j $(nproc) --branch $toolchain_branch $toolchain_repo $toolchain_name
-            fi
-            # --- ИСПРАВЛЕНИЕ: Больше не добавляем мусорные пути в PATH ---
-            # jq -r ".binaryEnv[]? | tostring" <<< "$toolchain" | while read -r subPath; do
-            #   echo "${{ env.WORKSPACE }}/$toolchain_name/$subPath" >> $GITHUB_PATH
-            # done
+            toolchain_repo=$(echo $toolchain | jq -r ".repo")
+            toolchain_branch=$(echo $toolchain | jq -r ".branch")
+            git clone --recursive --depth=1 -j $(nproc) --branch $toolchain_branch $toolchain_repo $toolchain_name
           done
+
+      - name: 🔥 Patch Makefile to remove problematic flag
+        working-directory: ${{ env.KERNEL_NAME }}
+        run: |
+          # Удаляем строку с флагом, который не понимает Clang
+          sed -i '/-Wno-undefined-optimized/d' Makefile
+          # На всякий случай удаляем и другие похожие флаги Qualcomm
+          sed -i '/-Wno-tautological-constant-out-of-range-compare/d' Makefile
+          echo "✅ Makefile patched successfully."
 
       - name: Disable Stack Protector
         working-directory: ${{ env.KERNEL_NAME }}
@@ -164,9 +151,6 @@ jobs:
           while read -r externalCommand; do
             key=$(echo "$externalCommand" | cut -d= -f1)
             value=$(echo "$externalCommand" | cut -d= -f2)
-            if [[ "$value" == *"/"* ]]; then
-              value="${{ env.WORKSPACE }}/$value"
-            fi
             args="$args $key=$value"
           done < <(jq -r '.externalCommands | to_entries[] | "\(.key)=\(.value)"' <<< "$PARAMS")
           echo "ARCH=$ARCH" >> $GITHUB_OUTPUT
@@ -179,6 +163,8 @@ jobs:
         run: |
           export KBUILD_BUILD_HOST=Github-Action
           export KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
+          # Добавляем системный PATH, чтобы gcc был точно доступен
+          export PATH=/usr/bin:/bin:/usr/sbin:/sbin:$PATH
           make ${{ env.ARGS }} ${{ env.KERNEL_DEFCONFIG_PATH }}
           make ${{ env.ARGS }}
 
