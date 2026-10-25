@@ -27,7 +27,10 @@
     "params": {
       "ARCH": "arm64",
       "CC": "clang",
-      "KCFLAGS": "-fno-stack-protector",
+      "defconfigFragments": [
+        "# CONFIG_CC_STACKPROTECTOR_STRONG is not set",
+        "CONFIG_CC_STACKPROTECTOR_NONE=y"
+      ],
       "externalCommands": {
         "CROSS_COMPILE": "aarch64-linux-gnu-",
         "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
