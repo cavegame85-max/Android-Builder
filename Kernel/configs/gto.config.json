@@ -18,12 +18,9 @@
     "params": {
       "ARCH": "arm64",
       "CC": "clang",
-      "KCFLAGS": "-Wno-unknown-warning-option -Wno-error=unknown-warning-option",
       "externalCommands": {
         "CROSS_COMPILE": "aarch64-linux-gnu-",
-        "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
-        "CROSS_COMPILE_COMPAT": "",
-        "CLANG_TRIPLE": ""
+        "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-"
       }
     },
     "AnyKernel3": {
