@@ -11,26 +11,14 @@
       {
         "name": "Proton-Clang",
         "repo": "https://github.com/kdrag0n/proton-clang",
-        "branch": "master",
-        "binaryEnv": [
-          "CC=clang",
-          "LLVM=1",
-          "LLVM_IAS=1",
-          "AR=llvm-ar",
-          "LD=ld.lld",
-          "OBJDUMP=llvm-objdump",
-          "STRIP=llvm-strip"
-        ]
+        "branch": "master"
       }
     ],
     "enableCcache": true,
     "params": {
       "ARCH": "arm64",
       "CC": "clang",
-      "defconfigFragments": [
-        "# CONFIG_CC_STACKPROTECTOR_STRONG is not set",
-        "CONFIG_CC_STACKPROTECTOR_NONE=y"
-      ],
+      "KCFLAGS": "-Wno-error -Wno-error=unknown-warning-option",
       "externalCommands": {
         "CROSS_COMPILE": "aarch64-linux-gnu-",
         "CROSS_COMPILE_ARM32": "arm-linux-gnueabi-",
